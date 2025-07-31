@@ -1,0 +1,210 @@
+/* Styles for the main dashboard (index.html) */
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) 1fr minmax(280px, 320px);
+  grid-template-areas: "activities calendar goals";
+  gap: clamp(1rem, 3vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.activities-column, .goals-column {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    min-height: clamp(300px, 60vh, 600px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 1vw, 1rem);
+}
+
+.activities-column {
+    grid-area: activities;
+}
+
+.goals-column {
+    grid-area: goals;
+}
+
+.calendar-view {
+    grid-area: calendar;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    min-height: clamp(300px, 60vh, 600px);
+    display: flex;
+    flex-direction: column;
+}
+
+.activities-column h2, .goals-column h2 {
+  text-align: center;
+  margin-top: 0;
+  padding: 0 1rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.weekday {
+    text-align: center;
+    font-weight: 600;
+    opacity: 0.7;
+    font-size: 0.9em;
+    padding-bottom: 2rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1/1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  position: relative;
+  padding: 0.35rem;
+  box-sizing: border-box;
+}
+
+.calendar-day.empty {
+    cursor: default;
+    background: transparent;
+}
+
+.calendar-day:not(.empty):hover {
+  background: var(--accent-primary)22;
+}
+
+.calendar-day.other-month .calendar-date-num {
+    opacity: 0.4;
+}
+
+.calendar-date-num {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  height: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+}
+
+.calendar-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  align-content: flex-start;
+  max-width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.calendar-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 1.5px var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+.calendar-title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.calendar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.current-activity-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    margin: 0;
+}
+
+.calendar-nav-btn {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    flex-shrink: 0;
+}
+
+/* Tablet optimization */
+@media (max-width: 1100px) and (min-width: 769px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "calendar"
+            "activities"
+            "goals";
+        gap: clamp(0.75rem, 2vw, 1.5rem);
+    }
+    
+    .activities-column, .goals-column, .calendar-view {
+        padding: clamp(0.5rem, 1.5vw, 1.25rem);
+        min-height: clamp(250px, 40vh, 400px);
+    }
+    
+    .calendar-header {
+        margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
+    }
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "calendar"
+            "activities"
+            "goals";
+        gap: clamp(0.5rem, 2vw, 1rem);
+    }
+    
+    .activities-column, .goals-column, .calendar-view {
+        padding: clamp(0.5rem, 2vw, 1rem);
+        min-height: clamp(200px, 30vh, 300px);
+    }
+    
+    .calendar-header {
+        margin-bottom: clamp(0.5rem, 1.5vw, 1rem);
+    }
+    
+    .calendar-title {
+        font-size: clamp(1.1rem, 3vw, 1.25rem);
+    }
+    
+    .current-activity-title {
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+    }
+    
+    .activities-column h2, .goals-column h2 {
+        padding: 0 clamp(0.25rem, 1vw, 0.5rem);
+        font-size: clamp(1.1rem, 3vw, 1.25rem);
+    }
+}

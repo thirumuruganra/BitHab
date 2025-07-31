@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Goals - BitHab</title>
+  <link rel="icon" href="../assets/images/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/images/logo.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,500&display=swap" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/management.css" />
+</head>
+<body>
+  <header class="header">
+    <h1 class="logo">
+      <a href="../index.html" style="text-decoration: none; color: inherit;">
+        <img src="../assets/images/logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
+        <img src="../assets/images/logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
+      </a>
+    </h1>
+    <div>
+      <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+    </div>
+  </header>
+  <div class="page-container">
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a href="../index.html" class="nav-link">Dashboard</a>
+            <a href="activities.html" class="nav-link">Manage Activities</a>
+            <a href="goals.html" class="nav-link active">Manage Goals</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="theme-toggle-sidebar" aria-label="Toggle theme">🌙</button>
+            <button id="logout-btn-sidebar" aria-label="Logout">Logout</button>
+        </div>
+    </aside>
+    <main class="content">
+        <div class="management-column">
+            <h2>Manage Goals</h2>
+            <div class="add-item-form">
+                <input type="text" id="add-goal-input" class="add-input" placeholder="Add new goal...">
+                <button id="add-goal-btn" class="add-btn" aria-label="Add goal">&#10148;</button>
+            </div>
+            <ul id="goal-list" class="goal-list"></ul>
+        </div>
+    </main>
+  </div>
+  <div id="confirmation-modal" class="modal hidden">
+    <div class="modal-content">
+        <p id="confirmation-message">Are you sure?</p>
+        <div class="confirmation-buttons">
+            <button id="confirm-yes" class="btn-confirm">Yes</button>
+            <button id="confirm-no" class="btn-cancel">No</button>
+        </div>
+    </div>
+  </div>
+  
+  <!-- Edit Goal Modal -->
+  <div id="edit-goal-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Edit Goal</h3>
+        <div class="edit-form">
+            <label for="edit-goal-name">Goal Name:</label>
+            <input type="text" id="edit-goal-name" placeholder="Goal name">
+            <div class="modal-buttons">
+                <button id="save-goal-edit" class="btn-confirm">Save</button>
+                <button id="cancel-goal-edit" class="btn-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="../config/firebase-config.js"></script>
+  <script src="../assets/js/goals.js"></script>
+  <script>
+    document.getElementById('sidebar-toggle').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelector('.sidebar').classList.toggle('hidden');
+    });
+    document.querySelector('.content').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.add('hidden');
+    });
+    document.querySelector('.sidebar').addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+  </script>
+</body>
+</html>

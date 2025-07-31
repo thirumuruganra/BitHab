@@ -4,32 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BitHab</title>
-  <link rel="icon" href="logo.png" type="image/png">
-  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="icon" href="assets/images/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/images/logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,500&display=swap" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="theme-loader.js"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
 <body>
   <header class="header">
     <h1 class="logo">
-      <img src="logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
-      <img src="logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
+      <img src="assets/images/logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
+      <img src="assets/images/logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
     </h1>
     <div>
       <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
-      <button id="theme-toggle" aria-label="Toggle theme">🌙</button>
-      <button id="logout-btn" class="hidden" aria-label="Logout">Logout</button>
     </div>
   </header>
   <div class="page-container">
     <aside class="sidebar">
         <nav class="sidebar-nav">
             <a href="index.html" class="nav-link active">Dashboard</a>
-            <a href="activities.html" class="nav-link">Manage Activities</a>
-            <a href="goals.html" class="nav-link">Manage Goals</a>
+            <a href="pages/activities.html" class="nav-link">Manage Activities</a>
+            <a href="pages/goals.html" class="nav-link">Manage Goals</a>
         </nav>
+        <div class="sidebar-footer">
+            <button id="theme-toggle-sidebar" aria-label="Toggle theme">🌙</button>
+            <button id="logout-btn-sidebar" aria-label="Logout">Logout</button>
+        </div>
     </aside>
     <main class="content">
         <div class="main-layout">
@@ -66,9 +68,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="theme-toggle.js"></script>
-  <script src="script.js"></script>
+  <script src="config/firebase-config.js"></script>
+  <script src="assets/js/script.js"></script>
   <script>
     document.getElementById('sidebar-toggle').addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent content click from firing immediately
