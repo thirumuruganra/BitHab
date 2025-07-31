@@ -29,9 +29,8 @@ curr3/
 │   ├── goals.html            # Goals management
 │   ├── login.html            # Login page
 │   └── register.html         # Registration page
-└── config/                    # Configuration files
-    ├── firebase-config.js     # Firebase configuration
-    └── generate-firebase-config.js
+└── config/                    # Configuration files 
+    └── generate-firebase-config.js # Firebase configuration
 ```
 
 ## File Relationships
