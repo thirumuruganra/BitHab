@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addGoalInput = document.getElementById('add-goal-input');
     const addGoalBtn = document.getElementById('add-goal-btn');
     const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
-    const themeToggleSidebar = document.getElementById('theme-toggle-sidebar');
     const confirmationModal = document.getElementById('confirmation-modal');
     const confirmationMessage = document.getElementById('confirmation-message');
     const confirmYes = document.getElementById('confirm-yes');
@@ -23,20 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let db;
     let confirmationAction = null;
     let currentEditingGoal = null;
-
-    const setThemeFromStorage = () => {
-        const savedTheme = localStorage.getItem('bitHabTheme');
-        if (savedTheme) {
-            document.body.className = savedTheme;
-        }
-        if(themeToggleSidebar) themeToggleSidebar.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
-    };
-
-    const toggleTheme = () => {
-        document.body.classList.toggle('dark');
-        if(themeToggleSidebar) themeToggleSidebar.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
-        localStorage.setItem('bitHabTheme', document.body.className);
-    };
 
     const showConfirmation = (message, onConfirm) => {
         confirmationMessage.textContent = message;
@@ -136,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadState();
         renderGoals();
         if(logoutBtnSidebar) logoutBtnSidebar.classList.remove('hidden');
-        setThemeFromStorage();
     };
 
     const saveGoalEdit = async () => {
@@ -198,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     addGoalBtn.addEventListener('click', addGoal);
     goalList.addEventListener('click', handleGoalActions);
-    if(themeToggleSidebar) themeToggleSidebar.addEventListener('click', toggleTheme);
 
     confirmNo.addEventListener('click', () => {
         confirmationModal.classList.add('hidden');

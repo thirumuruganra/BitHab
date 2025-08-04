@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes - BitHab</title>
+  <link rel="icon" href="../assets/images/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/images/logo.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,500&display=swap" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/notes.css" />
+</head>
+<body>
+  <header class="header">
+    <a href="../index.html" class="logo-link">
+      <h1 class="logo">
+        <img src="../assets/images/logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
+        <img src="../assets/images/logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
+      </h1>
+    </a>
+    <div>
+      <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+    </div>
+  </header>
+  <div class="page-container">
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a href="../index.html" class="nav-link">🏠 Home</a>
+            <a href="activities.html" class="nav-link">📝 Activities</a>
+            <a href="goals.html" class="nav-link">🎯 Goals</a>
+            <a href="notes.html" class="nav-link active">📔 Notes</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="theme-toggle-sidebar" aria-label="Toggle theme">🌙</button>
+            <button id="logout-btn-sidebar" aria-label="Logout">Logout</button>
+        </div>
+    </aside>
+    <main class="content">
+        <div class="notes-container">
+            <div class="page-header">
+                <h1>📔 Daily Notes</h1>
+                <p class="page-subtitle">All your daily reflections and notes in one place</p>
+            </div>
+            
+            <div class="notes-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-notes">0</div>
+                    <div class="stat-label">Total Notes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="recent-notes">0</div>
+                    <div class="stat-label">This Month</div>
+                </div>
+            </div>
+
+            <div class="notes-content">
+                <div class="notes-header">
+                    <div class="notes-filter">
+                        <button class="filter-btn active" data-filter="all">All Notes</button>
+                        <button class="filter-btn" data-filter="recent">Recent</button>
+                        <button class="filter-btn" data-filter="older">Older</button>
+                    </div>
+                    <button id="add-new-note-btn" class="btn-primary">➕ Add New Note</button>
+                </div>
+
+                <div class="notes-list" id="notes-list">
+                    <div class="empty-state hidden" id="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>No notes yet</h3>
+                        <p>Start adding notes to your daily activities from the calendar to see them here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+  </div>
+
+  <div id="edit-note-modal" class="modal hidden">
+    <div class="modal-content note-modal">
+        <div class="modal-header">
+            <h3 id="edit-modal-title">Add New Note</h3>
+            <button class="modal-close" id="close-edit-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="date-input-group">
+                <input type="date" id="edit-note-date" class="date-input">
+                <div class="date-shortcuts">
+                    <button type="button" class="date-shortcut" data-days="0">Today</button>
+                    <button type="button" class="date-shortcut" data-days="-1">Yesterday</button>
+                    <button type="button" class="date-shortcut" data-days="1">Tomorrow</button>
+                </div>
+            </div>
+            <div class="note-input-group">
+                <textarea id="edit-note-text" placeholder="What's on your mind?" rows="4" class="note-textarea"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="save-note-btn" class="btn-save">Save</button>
+            <button id="delete-note-btn" class="btn-delete hidden">Delete</button>
+        </div>
+    </div>
+  </div>
+
+  <div id="loading-indicator" class="loading hidden">Saving...</div>
+
+  <div id="confirmation-modal" class="modal hidden">
+    <div class="modal-content">
+        <p id="confirmation-message">Are you sure?</p>
+        <div class="confirmation-buttons">
+            <button id="confirm-yes" class="btn-confirm">Yes</button>
+            <button id="confirm-no" class="btn-cancel">No</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="../config/firebase-config.js"></script>
+  <script src="../assets/js/theme-toggle.js"></script>
+  <script src="../assets/js/notes.js"></script>
+  <script>
+    document.getElementById('sidebar-toggle').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelector('.sidebar').classList.toggle('hidden');
+    });
+    document.querySelector('.content').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.add('hidden');
+    });
+    document.querySelector('.sidebar').addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage Activities - BitHab</title>
+  <title>Activities - BitHab</title>
   <link rel="icon" href="../assets/images/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="../assets/images/logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
@@ -13,12 +13,12 @@
 </head>
 <body>
   <header class="header">
-    <h1 class="logo">
-      <a href="../index.html" style="text-decoration: none; color: inherit;">
+    <a href="../index.html" class="logo-link">
+      <h1 class="logo">
         <img src="../assets/images/logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
         <img src="../assets/images/logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
-      </a>
-    </h1>
+      </h1>
+    </a>
     <div>
       <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
     </div>
@@ -26,9 +26,10 @@
   <div class="page-container">
     <aside class="sidebar">
         <nav class="sidebar-nav">
-            <a href="../index.html" class="nav-link">Dashboard</a>
-            <a href="activities.html" class="nav-link active">Manage Activities</a>
-            <a href="goals.html" class="nav-link">Manage Goals</a>
+            <a href="../index.html" class="nav-link">🏠 Home</a>
+            <a href="activities.html" class="nav-link active">📝 Activities</a>
+            <a href="goals.html" class="nav-link">🎯 Goals</a>
+            <a href="notes.html" class="nav-link">📔 Notes</a>
         </nav>
         <div class="sidebar-footer">
             <button id="theme-toggle-sidebar" aria-label="Toggle theme">🌙</button>
@@ -37,10 +38,13 @@
     </aside>
     <main class="content">
         <div class="management-column">
-            <h2>Manage Activities</h2>
+            <div class="page-header">
+                <h1>📝 Activities</h1>
+                <p class="page-subtitle">Add, edit, and organize your daily activities</p>
+            </div>
             <div class="add-item-form">
-                <input type="text" id="add-activity-input" class="add-input" placeholder="Add new activity...">
-                <button id="add-activity-btn" class="add-btn" aria-label="Add activity">&#10148;</button>
+                <input type="text" id="add-activity-input" class="add-input" placeholder="📝 Add new activity...">
+                <button id="add-activity-btn" class="add-btn" aria-label="Add activity">➕</button>
             </div>
             <ul id="activity-list" class="activity-list"></ul>
         </div>
@@ -87,10 +91,12 @@
         </div>
     </div>
   </div>
+
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="../config/firebase-config.js"></script>
+  <script src="../assets/js/theme-toggle.js"></script>
   <script src="../assets/js/activities.js"></script>
   <script>
     document.getElementById('sidebar-toggle').addEventListener('click', (e) => {

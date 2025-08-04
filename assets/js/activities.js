@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addActivityInput = document.getElementById('add-activity-input');
     const addActivityBtn = document.getElementById('add-activity-btn');
     const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
-    const themeToggleSidebar = document.getElementById('theme-toggle-sidebar');
     const confirmationModal = document.getElementById('confirmation-modal');
     const confirmationMessage = document.getElementById('confirmation-message');
     const confirmYes = document.getElementById('confirm-yes');
@@ -33,20 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let confirmationAction = null;
     let currentEditingActivity = null;
     let currentEditingSubActivity = null;
-
-    const setThemeFromStorage = () => {
-        const savedTheme = localStorage.getItem('bitHabTheme');
-        if (savedTheme) {
-            document.body.className = savedTheme;
-        }
-        if(themeToggleSidebar) themeToggleSidebar.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
-    };
-
-    const toggleTheme = () => {
-        document.body.classList.toggle('dark');
-        if(themeToggleSidebar) themeToggleSidebar.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
-        localStorage.setItem('bitHabTheme', document.body.className);
-    };
 
     const showConfirmation = (message, onConfirm) => {
         confirmationMessage.textContent = message;
@@ -276,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Remove sub-activity from state and save
                         activity.subActivities = activity.subActivities.filter(s => s.id !== subId);
                         await saveState();
+                        
                         console.log('Sub-activity deleted from state.');
 
                     } catch (err) {
@@ -293,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadState();
         renderActivities();
         if(logoutBtnSidebar) logoutBtnSidebar.classList.remove('hidden');
-        setThemeFromStorage();
     };
 
     const saveActivityEdit = async () => {
@@ -385,7 +370,6 @@ document.addEventListener('DOMContentLoaded', () => {
     addActivityBtn.addEventListener('click', addActivity);
     activityList.addEventListener('click', handleActivityActions);
     activityList.addEventListener('keyup', handleActivityActions);
-    if(themeToggleSidebar) themeToggleSidebar.addEventListener('click', toggleTheme);
 
     confirmNo.addEventListener('click', () => {
         confirmationModal.classList.add('hidden');

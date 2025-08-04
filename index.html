@@ -13,10 +13,12 @@
 </head>
 <body>
   <header class="header">
-    <h1 class="logo">
-      <img src="assets/images/logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
-      <img src="assets/images/logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
-    </h1>
+    <a href="index.html" class="logo-link">
+      <h1 class="logo">
+        <img src="assets/images/logo-transparent-light.png" alt="BitHab Logo" class="logo-light">
+        <img src="assets/images/logo-transparent-dark.png" alt="BitHab Logo" class="logo-dark">
+      </h1>
+    </a>
     <div>
       <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
     </div>
@@ -24,9 +26,10 @@
   <div class="page-container">
     <aside class="sidebar">
         <nav class="sidebar-nav">
-            <a href="index.html" class="nav-link active">Dashboard</a>
-            <a href="pages/activities.html" class="nav-link">Manage Activities</a>
-            <a href="pages/goals.html" class="nav-link">Manage Goals</a>
+            <a href="index.html" class="nav-link active">🏠 Home</a>
+            <a href="pages/activities.html" class="nav-link">📝 Activities</a>
+            <a href="pages/goals.html" class="nav-link">🎯 Goals</a>
+            <a href="pages/notes.html" class="nav-link">📔 Notes</a>
         </nav>
         <div class="sidebar-footer">
             <button id="theme-toggle-sidebar" aria-label="Toggle theme">🌙</button>
@@ -36,14 +39,14 @@
     <main class="content">
         <div class="main-layout">
             <div class="activities-column">
-                <h2>Activities</h2>
+                <h2><a href="pages/activities.html" class="section-title-link">📝 Activities</a></h2>
                 <ul id="activity-list" class="activity-list"></ul>
             </div>
             <section class="calendar-view" id="calendar-view">
               <!-- Calendar will be rendered here by script.js -->
             </section>
             <div class="goals-column">
-                <h2>Goals</h2>
+                <h2><a href="pages/goals.html" class="section-title-link">🎯 Goals</a></h2>
                 <ul id="goal-list" class="goal-list"></ul>
             </div>
         </div>
@@ -69,6 +72,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="config/firebase-config.js"></script>
+  <script src="assets/js/theme-toggle.js"></script>
   <script src="assets/js/script.js"></script>
   <script>
     document.getElementById('sidebar-toggle').addEventListener('click', (e) => {

@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
         activities: [],
         goals: [],
         logs: {},
+        notes: {}, // Add notes storage
+        metadata: {
+            firstActivityDate: null // Track first ever activity date
+        },
         ui: {
             currentDate: new Date(),
             selectedActivityId: null,
@@ -20,8 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addGoalInput = document.getElementById('add-goal-input');
     const calendarView = document.querySelector('.calendar-view');
     const loggingModal = document.getElementById('logging-modal');
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeToggleSidebar = document.getElementById('theme-toggle-sidebar');
     const loadingIndicator = document.getElementById('loading-indicator');
     const authContainer = document.getElementById('auth-container');
     const mainLayout = document.querySelector('.main-layout');
@@ -48,11 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userId) return;
         try {
             const uiStateToSave = {
-                currentDate: state.ui.currentDate.toISOString(),
                 selectedActivityId: state.ui.selectedActivityId,
             };
             // Use set with merge to only update the ui field and not overwrite other root fields.
-            await db.collection('users').doc(userId).set({ ui: uiStateToSave }, { merge: true });
+            await db.collection('users').doc(userId).set({ 
+                ui: uiStateToSave,
+                metadata: state.metadata
+            }, { merge: true });
         } catch (e) {
             console.error("Error saving UI state to Firebase:", e);
         }
@@ -63,11 +67,27 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const batch = db.batch();
             
+            // Track first activity date
+            const allDates = Object.keys(state.logs).filter(dateStr => 
+                state.logs[dateStr] && state.logs[dateStr].length > 0
+            );
+            
+            if (allDates.length > 0) {
+                const earliestDate = allDates.sort()[0];
+                if (!state.metadata.firstActivityDate || earliestDate < state.metadata.firstActivityDate) {
+                    state.metadata.firstActivityDate = earliestDate;
+                }
+            }
+            
             // Save each date's logs as a separate document in the logs subcollection
             Object.keys(state.logs).forEach(dateStr => {
                 const logRef = db.collection('users').doc(userId).collection('logs').doc(dateStr);
                 batch.set(logRef, { loggedSubActivityIds: state.logs[dateStr] });
             });
+            
+            // Save metadata with first activity date
+            const userRef = db.collection('users').doc(userId);
+            batch.set(userRef, { metadata: state.metadata }, { merge: true });
             
             await batch.commit();
         } catch (e) {
@@ -84,6 +104,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const saveNotes = async (dateStr, note) => {
+        if (!userId || !dateStr) return;
+        try {
+            if (note && note.trim()) {
+                // Save note if it has content
+                await db.collection('users').doc(userId).collection('notes').doc(dateStr).set({ note: note.trim() });
+                state.notes[dateStr] = note.trim();
+            } else {
+                // Delete note if it's empty
+                await db.collection('users').doc(userId).collection('notes').doc(dateStr).delete();
+                delete state.notes[dateStr];
+            }
+        } catch (e) {
+            console.error("Error saving note to Firebase:", e);
+        }
+    };
+
     const loadState = async () => {
         if (!userId) return;
         try {
@@ -92,14 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = userDoc.data();
                 state.activities = data.activities || [];
                 state.goals = data.goals || [];
+                state.metadata = data.metadata || { firstActivityDate: null };
+                
                 if (data.ui) {
                     state.ui.selectedActivityId = data.ui.selectedActivityId || null;
-                    // This check prevents the "Invalid Date" error.
-                    if (data.ui.currentDate && !isNaN(new Date(data.ui.currentDate))) {
-                        state.ui.currentDate = new Date(data.ui.currentDate);
-                    } else {
-                        state.ui.currentDate = new Date();
-                    }
+                    // Always start with current date (today's month)
+                    state.ui.currentDate = new Date();
                 }
             }
 
@@ -115,9 +150,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.logs[doc.id] = doc.data().loggedSubActivityIds;
             });
 
+            // Load notes separately as they are in a sub-collection
+            const notesSnapshot = await db.collection('users').doc(userId).collection('notes').get();
+            state.notes = {}; // Reset notes before loading
+            notesSnapshot.forEach(doc => {
+                state.notes[doc.id] = doc.data().note;
+            });
+
         } catch (e) {
             console.error("Error loading state from Firebase:", e);
         }
+        
     };
 
     // --- Streak Calculation Functions ---
@@ -259,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getDotsForDate = (activity, dateStr) => {
         if (!activity) return '';
         const loggedIds = new Set(state.logs[dateStr] || []);
+        
         if (activity.subActivities && activity.subActivities.length > 0) {
             return activity.subActivities
                 .filter(sub => loggedIds.has(sub.id))
@@ -267,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (loggedIds.has(activity.id)) {
             return `<span class="calendar-dot" style="background-color: var(--text-primary);"></span>`;
         }
+        
         return '';
     };
 
@@ -360,10 +405,56 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarGrid.innerHTML = gridHTML;
     };
 
+    const openNotesOnlyModal = (dateStr, activity) => {
+        const formatDateForModal = (ds) => {
+            const [year, month, day] = ds.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            const monthName = date.toLocaleString('default', { month: 'long' });
+            let dayWithSuffix;
+            if (day > 3 && day < 21) {
+                dayWithSuffix = `${day}th`;
+            } else {
+                switch (day % 10) {
+                    case 1: dayWithSuffix = `${day}st`; break;
+                    case 2: dayWithSuffix = `${day}nd`; break;
+                    case 3: dayWithSuffix = `${day}rd`; break;
+                    default: dayWithSuffix = `${day}th`; break;
+                }
+            }
+            return `${dayWithSuffix} ${monthName}`;
+        };
+
+        // Check if activity is currently logged for this date
+        const isLogged = state.logs[dateStr] && state.logs[dateStr].includes(activity.id);
+        const statusMessage = isLogged 
+            ? `✅ <strong>${activity.name}</strong> is logged for this day!`
+            : `❌ <strong>${activity.name}</strong> was removed from this day.`;
+
+        // Display notes as read-only
+        const notesContent = state.notes[dateStr] 
+            ? `<div class="notes-display">${state.notes[dateStr]}</div>`
+            : `<div class="notes-display no-notes">No notes for this day. <a href="pages/notes.html">Add notes here</a>.</div>`;
+
+        loggingModal.innerHTML = `
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>${formatDateForModal(dateStr)}</h3>
+                <p>${statusMessage}</p>
+                <div class="notes-section">
+                    <label>📝 Notes for this day:</label>
+                    ${notesContent}
+                </div>
+            </div>
+        `;
+
+        loggingModal.classList.remove('hidden');
+        loggingModal.dataset.date = dateStr;
+    };
+
     const openLoggingModal = (dateStr) => {
         const activityId = state.ui.selectedActivityId;
         const activity = state.activities.find(a => a.id === activityId);
-        if (!activity || !activity.subActivities || activity.subActivities.length === 0) {
+        if (!activity) {
             return;
         }
 
@@ -385,27 +476,60 @@ document.addEventListener('DOMContentLoaded', () => {
             return `${dayWithSuffix} ${monthName}`;
         };
 
+        // Create pills section only if there are sub-activities
+        let pillsSection = '';
+        if (activity.subActivities && activity.subActivities.length > 0) {
+            const loggedIds = new Set(state.logs[dateStr] || []);
+            pillsSection = `
+                <div id="pill-container">
+                    ${activity.subActivities.map(sub => {
+                        const isSelected = loggedIds.has(sub.id);
+                        return `<div class="pill ${isSelected ? 'selected' : ''}" data-id="${sub.id}" style="--pill-color: ${sub.color}">
+                            ${sub.name}
+                        </div>`;
+                    }).join('')}
+                </div>
+            `;
+        } else {
+            // For activities without sub-activities, show main activity as a pill
+            const isLogged = state.logs[dateStr] && state.logs[dateStr].includes(activity.id);
+            pillsSection = `
+                <div id="pill-container">
+                    <div class="pill ${isLogged ? 'selected' : ''}" data-id="${activity.id}" style="--pill-color: var(--accent-primary)">
+                        ${activity.name}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display notes as read-only
+        const notesContent = state.notes[dateStr] 
+            ? `<div class="notes-display">${state.notes[dateStr]}</div>`
+            : `<div class="notes-display no-notes">No notes for this day. <a href="pages/notes.html">Add notes here</a>.</div>`;
+
         loggingModal.innerHTML = `
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h3>${formatDateForModal(dateStr)}</h3>
                 <p>Activity: <strong>${activity.name}</strong></p>
-                <div id="pill-container">
-                    ${activity.subActivities.map(sub => `
-                        <div class="pill" data-id="${sub.id}" style="--pill-color: ${sub.color}">
-                            ${sub.name}
-                        </div>
-                    `).join('')}
+                ${pillsSection}
+                <div class="notes-section">
+                    <label>📝 Notes for this day:</label>
+                    ${notesContent}
                 </div>
+            </div>
             </div>
         `;
 
-        const loggedIds = new Set(state.logs[dateStr] || []);
-        loggingModal.querySelectorAll('.pill').forEach(pill => {
-            if (loggedIds.has(pill.dataset.id)) {
-                pill.classList.add('selected');
-            }
-        });
+        // Set initial pill selections for sub-activities
+        if (activity.subActivities && activity.subActivities.length > 0) {
+            const loggedIds = new Set(state.logs[dateStr] || []);
+            loggingModal.querySelectorAll('.pill').forEach(pill => {
+                if (loggedIds.has(pill.dataset.id)) {
+                    pill.classList.add('selected');
+                }
+            });
+        }
 
         loggingModal.classList.remove('hidden');
         loggingModal.dataset.date = dateStr;
@@ -460,31 +584,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const activity = state.activities.find(a => a.id === activityId);
 
             if (activity) {
-                // If the activity has sub-activities, open the modal for selection.
-                if (activity.subActivities && activity.subActivities.length > 0) {
-                    openLoggingModal(dateStr);
-                } else {
-                    // Otherwise, directly toggle the log for the main activity.
+                // If activity has no subactivities, toggle it and show notes modal
+                if (!activity.subActivities || activity.subActivities.length === 0) {
+                    // Initialize logs for this date if needed
                     if (!state.logs[dateStr]) {
                         state.logs[dateStr] = [];
                     }
-                    const logIndex = state.logs[dateStr].indexOf(activity.id);
-                    if (logIndex > -1) {
-                        // Already logged, so remove it (un-log).
-                        state.logs[dateStr].splice(logIndex, 1);
+                    
+                    const isAlreadyLogged = state.logs[dateStr].includes(activity.id);
+                    
+                    if (isAlreadyLogged) {
+                        // Remove (de-log) the activity
+                        state.logs[dateStr] = state.logs[dateStr].filter(id => id !== activity.id);
+                        
+                        // If no activities logged for this date, delete the entry
                         if (state.logs[dateStr].length === 0) {
                             delete state.logs[dateStr];
-                            await deleteLogsFromFirebase(dateStr); // Delete from Firebase when no logs remain
+                            await deleteLogsFromFirebase(dateStr);
                         } else {
-                            await saveLogs(); // Save logs to Firebase
+                            await saveLogs();
                         }
                     } else {
-                        // Not logged, so add it.
+                        // Add (log) the activity
                         state.logs[dateStr].push(activity.id);
-                        await saveLogs(); // Save logs to Firebase
+                        await saveLogs();
                     }
-                    renderCalendar(); // Re-render calendar to show/hide the dot.
-                    renderActivities(); // Re-render activities to update streak.
+                    
+                    // Open modal only for notes
+                    openNotesOnlyModal(dateStr, activity);
+                } else {
+                    // For activities with subactivities, show the full modal
+                    openLoggingModal(dateStr);
                 }
             }
         }
@@ -504,29 +634,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pill = target.closest('.pill');
         if (pill) {
-            const subId = pill.dataset.id;
+            // Toggle pill selection and autosave
+            pill.classList.toggle('selected');
             
-            // Use a Set for easier and more robust toggling
-            const loggedIds = new Set(state.logs[dateStr] || []);
-
-            if (loggedIds.has(subId)) {
-                loggedIds.delete(subId);
-            } else {
-                loggedIds.add(subId);
-            }
+            // Auto-save the current selections
+            const loggedIds = new Set();
+            loggingModal.querySelectorAll('.pill.selected').forEach(selectedPill => {
+                loggedIds.add(selectedPill.dataset.id);
+            });
 
             if (loggedIds.size === 0) {
                 delete state.logs[dateStr];
-                await deleteLogsFromFirebase(dateStr); // Delete from Firebase when no logs remain
+                await deleteLogsFromFirebase(dateStr);
             } else {
                 state.logs[dateStr] = Array.from(loggedIds);
-                await saveLogs(); // Save logs to Firebase
+                await saveLogs();
             }
             
-            // Autosave and close
-            loggingModal.classList.add('hidden');
+            // Update calendar display immediately
             renderCalendar();
             renderActivities();
+            
+            // Auto-close modal after subactivity selection for better UX
+            // Give a brief moment to show the selection, then close
+            setTimeout(() => {
+                loggingModal.classList.add('hidden');
+            }, 500);
         }
     };
 
@@ -536,15 +669,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingIndicator.style.backgroundColor = isError ? '#e53935' : 'var(--accent-primary)';
         loadingIndicator.classList.remove('hidden');
         setTimeout(() => loadingIndicator.classList.add('hidden'), 1500);
-    };
-
-    const toggleTheme = () => {
-        document.body.classList.toggle('dark');
-        const isDark = document.body.classList.contains('dark');
-        const themeIcon = isDark ? '☀️' : '🌙';
-        if(themeToggle) themeToggle.innerHTML = themeIcon;
-        if(themeToggleSidebar) themeToggleSidebar.innerHTML = themeIcon;
-        localStorage.setItem('bitHabTheme', document.body.className);
     };
 
     // --- Initial Setup ---
@@ -600,11 +724,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const init = () => {
-        const savedTheme = localStorage.getItem('bitHabTheme');
-        if (savedTheme) document.body.className = savedTheme;
-        if(themeToggle) themeToggle.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
-        if(themeToggleSidebar) themeToggleSidebar.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
-
         setupAuth();
 
         const addActivity = () => {
@@ -637,8 +756,6 @@ document.addEventListener('DOMContentLoaded', () => {
         goalList.addEventListener('click', handleGoalActions);
         calendarView.addEventListener('click', handleCalendarActions);
         loggingModal.addEventListener('click', handleModalActions);
-        if(themeToggle) themeToggle.addEventListener('click', toggleTheme);
-        if(themeToggleSidebar) themeToggleSidebar.addEventListener('click', toggleTheme);
 
         confirmNo.addEventListener('click', () => {
             confirmationModal.classList.add('hidden');
@@ -653,6 +770,10 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmationAction = null;
         });
     };
+
+    // --- Global Functions for Cross-File Access ---
+    window.getAppState = () => state;
+    window.getFirstActivityDate = () => state.metadata.firstActivityDate;
 
     init();
 });
