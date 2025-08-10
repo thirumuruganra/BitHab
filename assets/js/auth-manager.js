@@ -1,3 +1,24 @@
+// Google Sign-In
+window.addEventListener('DOMContentLoaded', function() {
+    const googleBtn = document.getElementById('google-login-btn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', function() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then((result) => {
+                    // Redirect to home on success
+                    window.location.href = '../index.html';
+                })
+                .catch((err) => {
+                    if (window.errorHandler && typeof window.errorHandler.handleFirebaseError === 'function') {
+                        window.errorHandler.handleFirebaseError(err);
+                    } else {
+                        alert(err.message || 'Google sign-in failed.');
+                    }
+                });
+        });
+    }
+});
 // Universal Authentication Manager for BitHab
 // Handles authentication state across all pages
 
