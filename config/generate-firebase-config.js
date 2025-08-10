@@ -12,5 +12,5 @@ const firebaseConfig = {
 
 const configString = `const firebaseConfig = ${JSON.stringify(firebaseConfig, null, 2)};\nfirebase.initializeApp(firebaseConfig);\nvar db = firebase.firestore();\n`;
 
-fs.writeFileSync('firebase-config.js', configString);
-console.log('firebase-config.js generated!');
+fs.writeFileSync('./config/firebase-config.js', configString);
+console.log('firebase-config.js generated in config folder!');
