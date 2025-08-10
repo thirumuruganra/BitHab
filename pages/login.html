@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - BitHab</title>
+  <title>BitHab</title>
   <link rel="icon" href="../assets/images/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="../assets/images/logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
@@ -35,60 +35,31 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="../config/firebase-config.js"></script>
+  <script src="../assets/js/error-handler.js"></script>
+  <script src="../assets/js/auth-manager.js"></script>
   <script src="../assets/js/theme-toggle.js"></script>
   <script>
-    function showError(message) {
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-      // Auto-hide error after 5 seconds
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-      }, 5000);
-    }
-
-    function hideError() {
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.style.display = 'none';
-    }
-
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      hideError(); // Hide any previous error
       
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
+      
+      // Show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Logging in...';
+      submitBtn.disabled = true;
       
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then(() => { 
           window.location.href = '../index.html'; 
         })
         .catch(err => {
-          // Show user-friendly error messages
-          let errorMessage = '';
-          switch(err.code) {
-            case 'auth/invalid-email':
-              errorMessage = 'Please enter a valid email address.';
-              break;
-            case 'auth/user-disabled':
-              errorMessage = 'This account has been disabled.';
-              break;
-            case 'auth/user-not-found':
-              errorMessage = 'No account found with this email address.';
-              break;
-            case 'auth/wrong-password':
-              errorMessage = 'Incorrect password. Please try again.';
-              break;
-            case 'auth/invalid-login-credentials':
-              errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-              break;
-            case 'auth/too-many-requests':
-              errorMessage = 'Too many failed attempts. Please try again later.';
-              break;
-            default:
-              errorMessage = 'Login failed. Please try again.';
-          }
-          showError(errorMessage);
+          errorHandler.handleFirebaseError(err);
+          // Reset button state
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
         });
     });
   </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register - BitHab</title>
+  <title>BitHab</title>
   <link rel="icon" href="../assets/images/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="../assets/images/logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
@@ -36,60 +36,45 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="../config/firebase-config.js"></script>
+  <script src="../assets/js/error-handler.js"></script>
+  <script src="../assets/js/auth-manager.js"></script>
   <script src="../assets/js/theme-toggle.js"></script>
   <script>
-    function showError(message) {
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-      // Auto-hide error after 5 seconds
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-      }, 5000);
-    }
-
-    function hideError() {
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.style.display = 'none';
-    }
-
     document.getElementById('register-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      hideError(); // Hide any previous error
       
       const email = document.getElementById('register-email').value;
       const password = document.getElementById('register-password').value;
       const confirmPassword = document.getElementById('register-confirm-password').value;
       
       if (password !== confirmPassword) {
-        showError('Passwords do not match. Please try again.');
+        errorHandler.showError('Passwords do not match. Please try again.');
         return;
       }
       
+      if (password.length < 6) {
+        errorHandler.showError('Password should be at least 6 characters long.');
+        return;
+      }
+      
+      // Show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Creating account...';
+      submitBtn.disabled = true;
+      
       firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(() => { 
-          window.location.href = '../index.html'; 
+          errorHandler.showSuccess('Account created successfully!');
+          setTimeout(() => {
+            window.location.href = '../index.html';
+          }, 1000);
         })
         .catch(err => {
-          // Show user-friendly error messages
-          let errorMessage = '';
-          switch(err.code) {
-            case 'auth/email-already-in-use':
-              errorMessage = 'An account with this email already exists.';
-              break;
-            case 'auth/invalid-email':
-              errorMessage = 'Please enter a valid email address.';
-              break;
-            case 'auth/weak-password':
-              errorMessage = 'Password should be at least 6 characters long.';
-              break;
-            case 'auth/operation-not-allowed':
-              errorMessage = 'Email registration is currently disabled.';
-              break;
-            default:
-              errorMessage = 'Registration failed. Please try again.';
-          }
-          showError(errorMessage);
+          errorHandler.handleFirebaseError(err);
+          // Reset button state
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
         });
     });
   </script>

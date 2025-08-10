@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notes - BitHab</title>
+  <title>BitHab</title>
   <link rel="icon" href="../assets/images/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="../assets/images/logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" />
@@ -39,8 +39,14 @@
     <main class="content">
         <div class="notes-container">
             <div class="page-header">
-                <h1>📔 Daily Notes</h1>
-                <p class="page-subtitle">All your daily reflections and notes in one place</p>
+                <h1>📔 Notes</h1>
+                <p class="page-subtitle">Organize your thoughts with daily notes and general notes</p>
+            </div>
+            
+            <!-- Note Type Toggle -->
+            <div class="note-type-toggle">
+                <button class="note-type-btn active" data-type="daily">📅 Daily</button>
+                <button class="note-type-btn" data-type="general">📝 General</button>
             </div>
             
             <div class="notes-stats">
@@ -52,23 +58,51 @@
                     <div class="stat-number" id="recent-notes">0</div>
                     <div class="stat-label">This Month</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="general-notes-count">0</div>
+                    <div class="stat-label">General Notes</div>
+                </div>
             </div>
 
-            <div class="notes-content">
-                <div class="notes-header">
-                    <div class="notes-filter">
-                        <button class="filter-btn active" data-filter="all">All Notes</button>
-                        <button class="filter-btn" data-filter="recent">Recent</button>
-                        <button class="filter-btn" data-filter="older">Older</button>
+            <!-- Daily Notes Section -->
+            <div class="notes-section" id="daily-notes-section">
+                <div class="notes-content">
+                    <div class="notes-header">
+                        <div class="notes-filter">
+                            <button class="filter-btn active" data-filter="all">All Notes</button>
+                            <button class="filter-btn" data-filter="recent">Recent</button>
+                            <button class="filter-btn" data-filter="older">Older</button>
+                        </div>
+                        <button id="add-new-note-btn" class="btn-primary">➕ Add Daily Note</button>
                     </div>
-                    <button id="add-new-note-btn" class="btn-primary">➕ Add New Note</button>
-                </div>
 
-                <div class="notes-list" id="notes-list">
-                    <div class="empty-state hidden" id="empty-state">
-                        <div class="empty-icon">📝</div>
-                        <h3>No notes yet</h3>
-                        <p>Start adding notes to your daily activities from the calendar to see them here.</p>
+                    <div class="notes-list" id="notes-list">
+                        <div class="empty-state hidden" id="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <h3>No daily notes yet</h3>
+                            <p>Start adding notes to your daily activities from the calendar to see them here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Notes Section -->
+            <div class="notes-section hidden" id="general-notes-section">
+                <div class="notes-content">
+                    <div class="notes-header">
+                        <div class="general-notes-filter">
+                            <button class="filter-btn active" data-filter="all">All General Notes</button>
+                            <button class="filter-btn" data-filter="recent">Recent</button>
+                        </div>
+                        <button id="add-new-general-note-btn" class="btn-primary">➕ Add General Note</button>
+                    </div>
+
+                    <div class="notes-list" id="general-notes-list">
+                        <div class="empty-state hidden" id="general-empty-state">
+                            <div class="empty-icon">📝</div>
+                            <h3>No general notes yet</h3>
+                            <p>Create your first general note to get started organizing your thoughts.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,16 +117,27 @@
             <button class="modal-close" id="close-edit-modal">&times;</button>
         </div>
         <div class="modal-body">
-            <div class="date-input-group">
-                <input type="date" id="edit-note-date" class="date-input">
-                <div class="date-shortcuts">
-                    <button type="button" class="date-shortcut" data-days="0">Today</button>
-                    <button type="button" class="date-shortcut" data-days="-1">Yesterday</button>
-                    <button type="button" class="date-shortcut" data-days="1">Tomorrow</button>
+            <!-- Daily Note Fields -->
+            <div id="daily-note-fields">
+                <div class="date-input-group">
+                    <input type="date" id="edit-note-date" class="date-input">
+                    <div class="date-shortcuts">
+                        <button type="button" class="date-shortcut" data-days="0">Today</button>
+                        <button type="button" class="date-shortcut" data-days="-1">Yesterday</button>
+                        <button type="button" class="date-shortcut" data-days="1">Tomorrow</button>
+                    </div>
                 </div>
             </div>
+            
+            <!-- General Note Fields -->
+            <div id="general-note-fields" class="hidden">
+                <div class="general-note-input-group">
+                    <input type="text" id="general-note-title" placeholder="Note Title" class="general-note-title-input">
+                </div>
+            </div>
+            
             <div class="note-input-group">
-                <textarea id="edit-note-text" placeholder="What's on your mind?" rows="4" class="note-textarea"></textarea>
+                <textarea id="edit-note-text" placeholder="What's on your mind?" rows="6" class="note-textarea"></textarea>
             </div>
         </div>
         <div class="modal-footer">
@@ -119,6 +164,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="../config/firebase-config.js"></script>
+  <script src="../assets/js/error-handler.js"></script>
+  <script src="../assets/js/auth-manager.js"></script>
   <script src="../assets/js/theme-toggle.js"></script>
   <script src="../assets/js/notes.js"></script>
   <script>
