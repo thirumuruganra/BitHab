@@ -1,4 +1,6 @@
-# BitHab - Professional Project Structure
+# BitHab - Project Structure
+
+**⚠️NOTE: This is not my code - the owner of this project is my classmate [vishal-muralidharan](https://github.com/vishal-muralidharan) I only helped him connect this app to a Firebase database and deploy the project**
 
 ## Project Overview
 BitHab is a habit tracking application with a clean, professional folder structure.
